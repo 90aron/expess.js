@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Collection</title>
+</head>
+<body>
+  <h1>Welcome to the Book Collection!</h1>
+
+  <h2>Add a Book</h2>
+  <form id="addBookForm">
+    <label for="id"> ID</label>
+    <input type="text" id="ID" name="ID" required>
+
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" required>
+
+    <label for="publishdate">publishDate:</label>
+    <input type="text" id="publishdate" name="publishdate" required>
+
+    <button type="submit">Add Book</button>
+  </form>
+
+  <h2>Books</h2>
+  <ul id="booksList"></ul>
+
+  <script>
+    // Function to fetch books and update the books list
+    function fetchBooks() {
+      fetch('/books')
+        .then(response => response.json())
+        .then(data => {
+          const booksList = document.getElementById('booksList');
+          booksList.innerHTML = '';
+
+          data.forEach(book => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${book.title} by ${book.author}`;
+            booksList.appendChild(listItem);
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    // Function to handle form submission
+    function handleFormSubmit(event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const title = form.title.value;
+      const author = form.author.value;
+
+      fetch('/books', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title, author })
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Book added:', data);
+          form.reset();
+          fetchBooks();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    // Add event listener to the form
+    const addBookForm = document.getElementById('addBookForm');
+    addBookForm.addEventListener('submit', handleFormSubmit);
+
+    // Fetch books on page load
+    fetchBooks();
+  </script>
+</body>
+</html>
